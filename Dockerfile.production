@@ -1,20 +1,27 @@
-FROM golang:1.18-bullseye as builder
+FROM golang:1.18-alpine3.16 as builder
 
 ENV APP_HOME /go/src/hasmail
 
 WORKDIR "$APP_HOME"
-COPY . .
+
+COPY . "$APP_HOME"
 
 RUN go mod download
+
 RUN go mod verify
+
 RUN go build ./cmd/mailservice
 
 FROM golang:1.18-bullseye
 
 ENV APP_HOME /go/src/hasmail
+
 RUN mkdir -p "$APP_HOME"
+
 WORKDIR "$APP_HOME"
 
 COPY --from=builder "$APP_HOME"/mailservice $APP_HOME
+
 EXPOSE 8000
+
 CMD ["./mailservice"]
