@@ -115,3 +115,14 @@ go test -v ./...
 
 ### Integration testing
 TBD
+
+## Developing
+TBD
+
+### Linting
+Install `golangci-lint`: https://golangci-lint.run/usage/install/#local-installation
+
+Run it:
+```bash
+golangci-lint run
+```
