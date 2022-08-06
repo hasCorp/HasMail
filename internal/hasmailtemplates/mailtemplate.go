@@ -104,15 +104,13 @@ func loadEmailClient() {
 
 	// first try to read from the credentials.json file
 	f, err := os.Open("credentials.json")
-	defer func() {
-		if err = f.Close(); err != nil {
-			log.Fatal("Failed to close config file")
-		}
-	}()
 
 	if err == nil {
 		// file exists, so read from it
 		fromEmailAddr, fromName, apiKey = readConfigFromFile(f)
+		if err = f.Close(); err != nil {
+			log.Fatal("failed to close config file", err)
+		}
 	} else if errors.Is(err, os.ErrNotExist) {
 		// read from environment
 		fromEmailAddr, fromName, apiKey = readConfigFromEnv()

@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/setup-go@v3
         with:
-          go-version: 1.17 # TODO: change to 1.18 when most linters support it, see https://github.com/golangci/golangci-lint/issues/2649
+          go-version: 1.18
       - uses: actions/checkout@v3
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
