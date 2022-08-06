@@ -10,21 +10,23 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-type SampleTemplate struct{}
+type template struct{}
 
-func (t *SampleTemplate) Name() string {
+func (t *template) Name() string {
 	return "sample"
 }
 
-func (t *SampleTemplate) Body() string {
+func (t *template) Body() string {
 	return "This is a test email. Congrats!\nThe value of foo is: {foo}"
 }
 
-func (t *SampleTemplate) Subject() string {
+func (t *template) Subject() string {
 	return "Test Email"
 }
 
 func SampleHandler(w http.ResponseWriter, r *http.Request) {
+	var err error
+
 	log.Println("Headers:")
 	for k, v := range r.Header {
 		log.Printf("\tKey: %v, Value: %v\n", k, v)
@@ -39,7 +41,7 @@ func SampleHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Printf("Request body: %s\n", string(b))
-	if err := json.Unmarshal(b, &req); err != nil {
+	if err = json.Unmarshal(b, &req); err != nil {
 		// request body didn't marshal into a map properly
 		hasmailtemplates.SendResponse(w, http.StatusBadRequest)
 		return
@@ -57,14 +59,14 @@ func SampleHandler(w http.ResponseWriter, r *http.Request) {
 
 	// use the template
 	// TODO: this stuff
-	template := SampleTemplate{}
-	mailBody, err := hasmailtemplates.InjectVars(&template, req.Vars)
+	t := template{}
+	mailBody, err := hasmailtemplates.InjectVars(&t, req.Vars)
 	if err != nil {
 		hasmailtemplates.SendResponse(w, http.StatusBadRequest)
 		return
 	}
 	log.Printf("Parsed body: %s\n", mailBody)
-	response, err := hasmailtemplates.SendEmail(r.Context(), template.Subject(), to, mailBody, mailBody)
+	response, err := hasmailtemplates.SendEmail(r.Context(), t.Subject(), to, mailBody, mailBody)
 
 	if response != nil {
 		log.Printf("SendGrid responded with code %d\n", response.StatusCode)

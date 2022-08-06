@@ -2,7 +2,6 @@ package testutil
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 
@@ -21,7 +20,7 @@ func (s *NoOpMailSender) SendWithContext(ctx context.Context, email *mail.SGMail
 	v := ctx.Value(FailWithCode{})
 	if v != nil {
 		mockCode = v.(int)
-		err = errors.New(fmt.Sprintf("Mocked error with code %d", mockCode))
+		err = fmt.Errorf("mocked error with code %d", mockCode)
 	}
 
 	res := rest.Response{

@@ -57,9 +57,10 @@ type MailResponse struct {
 // "{var}", where `var` is the key, and it is surrounded by curly braces.
 // This makes it so that the request body can contain a simple key-value
 // pair, e.g.:
-// {
-//   "var": "foo"
-// }
+//
+//	{
+//	  "var": "foo"
+//	}
 func InjectVars(t MailTemplate, vars map[string]string) (string, error) {
 	parsed := t.Body()
 	log.Printf("Mail body template: %s\n", parsed)
@@ -80,10 +81,17 @@ func SendResponse(w http.ResponseWriter, code int) {
 	}
 	b, _ := json.Marshal(resp)
 	w.WriteHeader(code)
-	w.Write(b)
+	_, err := w.Write(b)
+	if err != nil {
+		log.Println("failed to write response data for request", err)
+	}
 }
 
-func SendEmail(ctx context.Context, subject string, to *mail.Email, plainTextContent string, htmlContent string) (*rest.Response, error) {
+func SendEmail(ctx context.Context,
+	subject string,
+	to *mail.Email,
+	plainTextContent string,
+	htmlContent string) (*rest.Response, error) {
 	clientInit.Do(loadEmailClient)
 	from := mail.NewEmail(fromName, fromEmailAddr)
 	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
@@ -97,11 +105,13 @@ func loadEmailClient() {
 
 	// first try to read from the credentials.json file
 	f, err := os.Open("credentials.json")
-	defer f.Close()
 
 	if err == nil {
 		// file exists, so read from it
 		fromEmailAddr, fromName, apiKey = readConfigFromFile(f)
+		if err = f.Close(); err != nil {
+			log.Fatal("failed to close config file", err)
+		}
 	} else if errors.Is(err, os.ErrNotExist) {
 		// read from environment
 		fromEmailAddr, fromName, apiKey = readConfigFromEnv()
@@ -143,6 +153,9 @@ func readConfigFromFile(f *os.File) (addr string, name string, apiKey string) {
 
 	var creds map[string]string
 	err = json.Unmarshal(bytes, &creds)
+	if err != nil {
+		log.Fatal("unexpected error occurred reading credential file", err)
+	}
 
 	var ok bool
 	addr, ok = creds["FROM_ADDR"]
