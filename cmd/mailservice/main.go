@@ -51,10 +51,11 @@ func start(bypassAuth bool, port int) {
 	}
 
 	srv := &http.Server{
-		Handler:      r,
-		Addr:         addr,
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
+		Handler:           r,
+		Addr:              addr,
+		WriteTimeout:      15 * time.Second,
+		ReadTimeout:       15 * time.Second,
+		ReadHeaderTimeout: 15 * time.Second,
 	}
 
 	log.Printf("Starting server on %s\n", srv.Addr)
