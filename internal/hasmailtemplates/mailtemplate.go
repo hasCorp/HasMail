@@ -57,9 +57,10 @@ type MailResponse struct {
 // "{var}", where `var` is the key, and it is surrounded by curly braces.
 // This makes it so that the request body can contain a simple key-value
 // pair, e.g.:
-// {
-//   "var": "foo"
-// }
+//
+//	{
+//	  "var": "foo"
+//	}
 func InjectVars(t MailTemplate, vars map[string]string) (string, error) {
 	parsed := t.Body()
 	log.Printf("Mail body template: %s\n", parsed)
