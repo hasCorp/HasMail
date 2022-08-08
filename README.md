@@ -47,6 +47,19 @@ When running locally, pass in the `-bypass` flag to ignore client auth verificat
 go run cmd/mailservice/main.go -bypass
 ```
 
+#### Verifying local auth for testing
+For local development, you can configure a static token to verify 
+that the header is read correctly for auth protected routes. Set a 
+static token with the `token` flag. Note that the `-bypass` flag takes 
+precedence over this.
+```
+go run cmd/mailservice/main.go -token abc123
+```
+
+```bash
+curl -d '{"foo": "bar"}' -H 'Authorization: abc123' -H 'Content-Type: application/json' localhost:8000/mail/foo
+```
+
 #### Listening port
 By default, the HTTP server listens on port `8000`. This can be changed when
 running via the `-port` flag:
@@ -85,7 +98,7 @@ curl localhost:8000/
 # verify routes work with no-op endpoint
 curl -d '{"a": "b"}' -H 'Content-Type: application/json' localhost:8000/mail/noop
 
-# send a sample mail
+# send a real sample mail end-to-end
 curl -d '{"name": "Hank Pecker", "vars": {"foo": "bar"}, "recipient": "hank@hascorp.dev"}' -H 'Content-Type: application/json' localhost:8000/mail/sample
 ```
 
