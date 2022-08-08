@@ -15,20 +15,19 @@ import (
 )
 
 var (
-	authFlag = flag.Bool("bypass", false, "denotes whether to skip API level authentication checks")
-	portFlag = flag.Int("port", 8000, "port that the HTTP server listens on")
+	authFlag       = flag.Bool("bypass", false, "denotes whether to skip API level authentication checks")
+	portFlag       = flag.Int("port", 8000, "port that the HTTP server listens on")
+	localTokenFlag = flag.String("token", "", "arbitrary string used for testing endpoint authentication locally")
 )
 
 func main() {
 	// TODO: add env var overrides for input flags to easily override
 	//       when running in a container
 	flag.Parse()
-	start(*authFlag, *portFlag)
+	start(*authFlag, *portFlag, *localTokenFlag)
 }
 
-func start(bypassAuth bool, port int) {
-	log.Printf("Starting with bypass=%v, port=%d", bypassAuth, port)
-
+func start(bypassAuth bool, port int, localToken string) {
 	if port < 1 {
 		log.Fatalf("Invalid port: %d", port)
 	}
@@ -46,8 +45,15 @@ func start(bypassAuth bool, port int) {
 	http.Handle("/", r)
 
 	r.Use(middleware.LoggingMiddleware)
-	if !bypassAuth {
+	if bypassAuth {
+		log.Println("WARNING: Bypassing all authentication")
 		s.Use(middleware.AuthVerifyMiddleware)
+	} else if len(localToken) > 0 {
+		log.Println("WARNING: Using static global authentication token to verify")
+		localAuth := middleware.LocalAuthMiddleware{
+			AllowedToken: localToken,
+		}
+		s.Use(localAuth.LocalAuthVerify)
 	}
 
 	srv := &http.Server{
